@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/engines")
+@RequestMapping("/api/v1/engines")
 public class EngineController {
     private final EngineService engineService;
 

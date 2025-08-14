@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/accessories")
+@RequestMapping("/api/v1/accessories")
 public class AccessoryController {
     private final AccessoryService accessoryService;
 
