@@ -2,11 +2,11 @@ package com.plcpipeline.ingestion.controllers;
 
 import com.plcpipeline.ingestion.dtos.EngineDto;
 import com.plcpipeline.ingestion.services.EngineService;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -19,33 +19,34 @@ public class EngineController {
     }
 
     @PostMapping
-    public EngineDto create(@RequestBody EngineDto dto) {
-        return engineService.createEngine(dto);
+    public ResponseEntity<EngineDto> create(@RequestBody EngineDto dto) {
+        return ResponseEntity.status(201).body(engineService.createEngine(dto));
     }
 
     @GetMapping
-    public List<EngineDto> getAll() {
-        return engineService.getAllEngines();
+    public ResponseEntity<List<EngineDto>> getAll() {
+        return ResponseEntity.ok(engineService.getAllEngines());
     }
 
     @GetMapping("/{id}")
-    public EngineDto getById(@PathVariable Long id) {
-        return engineService.getEngineById(id);
+    public ResponseEntity<EngineDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(engineService.getEngineById(id));
     }
 
     @PutMapping("/{id}")
-    public EngineDto update(@PathVariable Long id, @RequestBody EngineDto dto) {
-        return engineService.updateEngine(id, dto);
+    public ResponseEntity<EngineDto> update(@PathVariable Long id, @RequestBody EngineDto dto) {
+        return ResponseEntity.ok(engineService.updateEngine(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         engineService.deleteEngine(id);
+        return ResponseEntity.noContent().build();
     }
 
     // @GetMapping("/categories")
-    // public List<String> getDistinctCategories() {
-    //     return engineService.getDistinctCategories();
+    // public ResponseEntity<List<String>> getDistinctCategories() {
+    //     return ResponseEntity.ok(engineService.getDistinctCategories());
     // }
     
 }

@@ -98,4 +98,41 @@ public class Mapper {
                 .category(dto.getCategory())
                 .build();
     }
+
+    // ====== Category ======
+    public static CategoryDto toCategoryDto(Category category) {
+        return CategoryDto.builder()
+                .categoryId(category.getCategoryId())
+                .name(category.getName())
+                .icon(category.getIcon())
+                .build();
+    }
+
+    public static Category toCategoryEntity(CategoryDto dto) {
+        return Category.builder()
+                .categoryId(dto.getCategoryId())
+                .name(dto.getName())
+                .icon(dto.getIcon())
+                .build();
+    }
+
+    // ====== EngineType ======
+    public static EngineTypeDto toEngineTypeDto(EngineType engineType) {
+        return EngineTypeDto.builder()
+                .engineTypeId(engineType.getEngineTypeId())
+                .name(engineType.getName())
+                .family(engineType.getFamily())
+                .model(engineType.getModel())
+                .categoryId(engineType.getCategory() != null ? engineType.getCategory().getCategoryId() : null)
+                .build();
+    }
+
+    public static EngineType toEngineTypeEntity(EngineTypeDto dto) {
+        return EngineType.builder()
+                .engineTypeId(dto.getEngineTypeId())
+                .name(dto.getName())
+                .family(dto.getFamily())
+                .model(dto.getModel())
+                .build();
+    }
 }

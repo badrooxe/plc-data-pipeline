@@ -18,20 +18,25 @@ public class Engine {
     private Long engineId;
     private String code; // e.g., "bed78dc"
     private String name;// e.g., "terex"
-    private String type;
+    private String type; //to remove later
     private String category; //levage/roullant // to remove later
     private String family; // e.g., "family1" // to remove later
     private String ipAddress; // e.g., "192.168.1.1"
     private boolean isActive;
     private String lastSeen; // ISO-8601 string
-    private String model;
+    private String model; //to remiove later
     private String manufacturer;
+
+    @ManyToOne
+    @JoinColumn(name = "engine_type_id", nullable = false)
+    private EngineType engineType;
+        
+    @ManyToOne
+    @JoinColumn(name = "terminal_id")
+    private Terminal terminal;
 
     @ManyToOne
     @JoinColumn(name = "port_id")
     private Port port;
-    
-    @ManyToOne
-    @JoinColumn(name = "terminal_id")
-    private Terminal terminal;
+
 }
