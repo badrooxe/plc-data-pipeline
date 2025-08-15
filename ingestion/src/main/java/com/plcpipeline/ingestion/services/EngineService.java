@@ -51,6 +51,10 @@ public class EngineService {
         });
     }
 
+    // public List<String> getDistinctCategories() {
+    //     return engineRepository.findDistinctCategories();
+    // }
+
     public List<EngineDto> getAllEngines() {
         return engineRepository.findAll().stream().map(Mapper::toEngineDto).collect(Collectors.toList());
     }

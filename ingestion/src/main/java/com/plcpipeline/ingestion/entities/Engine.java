@@ -18,9 +18,9 @@ public class Engine {
     private Long engineId;
     private String code; // e.g., "bed78dc"
     private String name;// e.g., "terex"
-    private String type; //equipement/accessory
-    private String category; //levage/roullant
-    private String family; // e.g., "family1"
+    private String type;
+    private String category; //levage/roullant // to remove later
+    private String family; // e.g., "family1" // to remove later
     private String ipAddress; // e.g., "192.168.1.1"
     private boolean isActive;
     private String lastSeen; // ISO-8601 string

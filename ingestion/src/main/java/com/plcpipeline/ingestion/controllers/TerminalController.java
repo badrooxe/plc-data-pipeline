@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/v1/terminals")
@@ -26,6 +29,13 @@ public class TerminalController {
     public ResponseEntity<TerminalDto> getTerminalById(@PathVariable Long id) {
         return ResponseEntity.ok(terminalService.getTerminalById(id));
     }
+
+    @GetMapping("/port/{portId}")
+    public ResponseEntity<List<TerminalDto>> getTerminalsByPortId(@PathVariable Long portId) {
+        List<TerminalDto> terminals = terminalService.getTerminalsByPortId(portId);
+        return ResponseEntity.ok(terminals);
+    }
+    
 
     @PostMapping
     public ResponseEntity<TerminalDto> createTerminal(@RequestBody TerminalDto dto) {

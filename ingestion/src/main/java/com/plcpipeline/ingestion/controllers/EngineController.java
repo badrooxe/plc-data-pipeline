@@ -5,6 +5,9 @@ import com.plcpipeline.ingestion.services.EngineService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/v1/engines")
@@ -39,4 +42,10 @@ public class EngineController {
     public void delete(@PathVariable Long id) {
         engineService.deleteEngine(id);
     }
+
+    // @GetMapping("/categories")
+    // public List<String> getDistinctCategories() {
+    //     return engineService.getDistinctCategories();
+    // }
+    
 }

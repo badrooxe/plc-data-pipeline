@@ -36,6 +36,13 @@ public class TerminalService {
         return Mapper.toTerminalDto(terminal);
     }
 
+    public List<TerminalDto> getTerminalsByPortId(Long portId) {
+        return terminalRepository.findByPort_PortId(portId)
+                .stream()
+                .map(Mapper::toTerminalDto)
+                .collect(Collectors.toList());
+    }
+
     public TerminalDto createTerminal(TerminalDto dto) {
         Port port = portRepository.findById(dto.getPortId())
                 .orElseThrow(() -> new RuntimeException("Port not found with id " + dto.getPortId()));
