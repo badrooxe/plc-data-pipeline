@@ -3,6 +3,8 @@ package com.plcpipeline.ingestion.controllers;
 import com.plcpipeline.ingestion.dtos.EngineDto;
 import com.plcpipeline.ingestion.services.EngineService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +21,7 @@ public class EngineController {
     }
 
     @PostMapping
-    public ResponseEntity<EngineDto> create(@RequestBody EngineDto dto) {
+    public ResponseEntity<EngineDto> create(@Valid @RequestBody EngineDto dto) {
         return ResponseEntity.status(201).body(engineService.createEngine(dto));
     }
 

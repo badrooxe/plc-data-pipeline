@@ -49,34 +49,36 @@ public class Mapper {
                 .engineId(engine.getEngineId())
                 .code(engine.getCode())
                 .name(engine.getName())
-                .type(engine.getType())
-                .category(engine.getCategory())
-                .family(engine.getFamily())
+                //.type(engine.getType())
+                //.category(engine.getCategory())
+                //.family(engine.getFamily())
                 .ipAddress(engine.getIpAddress())
                 .isActive(engine.isActive())
                 .lastSeen(engine.getLastSeen())
-                .model(engine.getModel())
+                //.model(engine.getModel())
                 .manufacturer(engine.getManufacturer())
                 .portId(engine.getPort() != null ? engine.getPort().getPortId() : null)
                 .terminalId(engine.getTerminal() != null ? engine.getTerminal().getTerminalId() : null)
+                .engineTypeId(engine.getEngineType() != null ? engine.getEngineType().getEngineTypeId() : null)
                 .build();
     }
 
-    public static Engine toEngineEntity(EngineDto dto, Port port, Terminal terminal) {
+    public static Engine toEngineEntity(EngineDto dto, Port port, Terminal terminal, EngineType engineType) {
         return Engine.builder()
                 .engineId(dto.getEngineId())
                 .code(dto.getCode())
                 .name(dto.getName())
-                .type(dto.getType())
-                .category(dto.getCategory())
-                .family(dto.getFamily())
+                //.type(dto.getType())
+                //.category(dto.getCategory())
+                //.family(dto.getFamily())
                 .ipAddress(dto.getIpAddress())
                 .isActive(dto.isActive())
                 .lastSeen(dto.getLastSeen())
-                .model(dto.getModel())
+                //.model(dto.getModel())
                 .manufacturer(dto.getManufacturer())
                 .port(port)
                 .terminal(terminal)
+                .engineType(engineType)
                 .build();
     }
 
