@@ -58,6 +58,7 @@ public class EngineTypeService {
         engineType.setName(dto.getName());
         engineType.setFamily(dto.getFamily());
         engineType.setModel(dto.getModel());
+        engineType.setIcon(dto.getIcon());
         engineType.setCategory(category);
 
         engineType = engineTypeRepository.save(engineType);

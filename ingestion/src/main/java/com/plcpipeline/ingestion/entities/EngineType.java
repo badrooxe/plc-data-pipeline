@@ -33,6 +33,7 @@ public class EngineType {
     private String name; // "CHARGEUSE GRANDE CAPACITE", "Levage Mobiles", etc.
     private String family; // 'terex', 'liebherr', etc.
     private String model; // e.g., "terex-rt-780"
+    private String icon; // e.g., "bi-exclamation-triangle-fill"
 
     // An EngineType can have multiple Accessories.
     // @ManyToOne

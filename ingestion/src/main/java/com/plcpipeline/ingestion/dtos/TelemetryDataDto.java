@@ -1,5 +1,7 @@
 package com.plcpipeline.ingestion.dtos;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import lombok.*;
 
@@ -11,17 +13,35 @@ import lombok.*;
 @ToString
 public class TelemetryDataDto {
     private Long terminalId;
-    private String engineId;
+    private Long engineTypeId;
     private Long portId;
+
+    private String engineName;
+    private String engineCode;
+    private String ipAddress;
     private String timestamp;
 
     private String variableName;
     private Object value;
 
+    // @JsonAnySetter
+    // public void captureVariable(String key, Object val) {
+    //     if (!key.equals("terminalId") && !key.equals("engineId") && 
+    //         !key.equals("portId") && !key.equals("timestamp")) {
+    //         this.variableName = key;
+    //         this.value = val;
+    //     }
+    // }
+
+    private static final Set<String> KNOWN_PROPERTIES = Set.of(
+        "engineCode", "engineName", "ipAddress", "portId", "terminalId", "timestamp", "engineTypeId"
+    );
+
     @JsonAnySetter
-    public void captureVariable(String key, Object val) {
-        if (!key.equals("terminalId") && !key.equals("engineId") && 
-            !key.equals("portId") && !key.equals("timestamp")) {
+    public void captureDynamicVariable(String key, Object val) {
+        // If the key is not one of our known, static properties,
+        // then it must be the dynamic telemetry variable we want to capture.
+        if (!KNOWN_PROPERTIES.contains(key)) {
             this.variableName = key;
             this.value = val;
         }

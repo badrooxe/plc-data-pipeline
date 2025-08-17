@@ -125,6 +125,7 @@ public class Mapper {
                 .name(engineType.getName())
                 .family(engineType.getFamily())
                 .model(engineType.getModel())
+                .icon(engineType.getIcon())
                 .categoryId(engineType.getCategory() != null ? engineType.getCategory().getCategoryId() : null)
                 .build();
     }
@@ -135,6 +136,8 @@ public class Mapper {
                 .name(dto.getName())
                 .family(dto.getFamily())
                 .model(dto.getModel())
+                .icon(dto.getIcon())
+                .category(dto.getCategoryId() != null ? Category.builder().categoryId(dto.getCategoryId()).build() : null)
                 .build();
     }
 }

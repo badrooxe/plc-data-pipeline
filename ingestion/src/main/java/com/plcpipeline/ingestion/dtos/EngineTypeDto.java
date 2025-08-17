@@ -12,5 +12,6 @@ public class EngineTypeDto {
     private String name;
     private String family;
     private String model;
+    private String icon;
     private Long categoryId; // only ID to avoid circular references
 }

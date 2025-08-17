@@ -1,6 +1,7 @@
 package com.plcpipeline.ingestion.services;
 
 import com.plcpipeline.ingestion.dtos.EngineDto;
+import com.plcpipeline.ingestion.dtos.TelemetryDataDto;
 import com.plcpipeline.ingestion.entities.Engine;
 import com.plcpipeline.ingestion.entities.EngineType;
 import com.plcpipeline.ingestion.entities.Port;
@@ -11,8 +12,11 @@ import com.plcpipeline.ingestion.repositories.EngineTypeRepository;
 import com.plcpipeline.ingestion.repositories.PortRepository;
 import com.plcpipeline.ingestion.repositories.TerminalRepository;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
+import com.plcpipeline.ingestion.exceptions.BadRequestException;
 import com.plcpipeline.ingestion.exceptions.ResourceConflictException;
 import com.plcpipeline.ingestion.exceptions.ResourceNotFoundException;
 
@@ -53,25 +57,53 @@ public class EngineService {
         return Mapper.toEngineDto(engineRepository.save(engine));
     }
 
-    // Retrieves an engine by its code, or creates a new one if it doesn't exist
-    public Engine getOrCreateByCode(String code, String name, Long portId, Long terminalId, Long engineTypeId) {
-        return engineRepository.findByCode(code).orElseGet(() -> {
-            Port port = (portId != null) ? portRepository.findById(portId).orElseThrow(() -> new ResourceNotFoundException("Port not found with ID: " + portId)) : null;
-            Terminal terminal = (terminalId != null) ? terminalRepository.findById(terminalId).orElseThrow(() -> new ResourceNotFoundException("Terminal not found with ID: " + terminalId)) : null;
-            EngineType engineType = (engineTypeId != null) ? engineTypeRepository.findById(engineTypeId).orElseThrow(() -> new ResourceNotFoundException("EngineType not found with ID: " + engineTypeId)) : null;
+    //This is the primary method for the Kafka ingestion pipeline.
+    @Transactional
+    public Engine findOrCreateEngineFromTelemetry(TelemetryDataDto telemetryData) {
+        return engineRepository.findByCode(telemetryData.getEngineCode())
+                .orElseGet(() -> {
 
-            Engine newEngine = Engine.builder()
-                    .code(code)
-                    .name(name != null ? name : "Unnamed Engine")
-                    .isActive(true)
-                    .lastSeen(Instant.now().toString())
-                    .port(port)
-                    .terminal(terminal)
-                    .engineType(engineType)
-                    .build();
-            return engineRepository.save(newEngine);
-        });
+                    if (telemetryData.getPortId() == null || telemetryData.getTerminalId() == null || telemetryData.getEngineTypeId() == null) {
+                        throw new BadRequestException("Cannot create new engine from telemetry. Message for code '" 
+                        + telemetryData.getEngineCode() + "' is missing required portId, terminalId, or engineTypeId.");
+                    }
+
+                    Port port = portRepository.findById(telemetryData.getPortId()).orElseThrow(() -> new ResourceNotFoundException("Port not found with ID: " + telemetryData.getPortId()));
+                    Terminal terminal = terminalRepository.findById(telemetryData.getTerminalId()).orElseThrow(() -> new ResourceNotFoundException("Terminal not found with ID: " + telemetryData.getTerminalId()));
+                    EngineType engineType = engineTypeRepository.findById(telemetryData.getEngineTypeId()).orElseThrow(() -> new ResourceNotFoundException("EngineType not found with ID: " + telemetryData.getEngineTypeId()));
+
+                    Engine newEngine = Engine.builder()
+                            .code(telemetryData.getEngineCode())
+                            .name(telemetryData.getEngineName())
+                            .isActive(true)
+                            .lastSeen(Instant.now().toString())
+                            .port(port)
+                            .terminal(terminal)
+                            .engineType(engineType)
+                            .build();
+                    return engineRepository.save(newEngine);
+                });
     }
+
+    // Retrieves an engine by its code, or creates a new one if it doesn't exist
+    // public Engine getOrCreateByCode(String code, String name, Long portId, Long terminalId, Long engineTypeId) {
+    //     return engineRepository.findByCode(code).orElseGet(() -> {
+    //         Port port = (portId != null) ? portRepository.findById(portId).orElseThrow(() -> new ResourceNotFoundException("Port not found with ID: " + portId)) : null;
+    //         Terminal terminal = (terminalId != null) ? terminalRepository.findById(terminalId).orElseThrow(() -> new ResourceNotFoundException("Terminal not found with ID: " + terminalId)) : null;
+    //         EngineType engineType = (engineTypeId != null) ? engineTypeRepository.findById(engineTypeId).orElseThrow(() -> new ResourceNotFoundException("EngineType not found with ID: " + engineTypeId)) : null;
+
+    //         Engine newEngine = Engine.builder()
+    //                 .code(code)
+    //                 .name(name != null ? name : "Unnamed Engine")
+    //                 .isActive(true)
+    //                 .lastSeen(Instant.now().toString())
+    //                 .port(port)
+    //                 .terminal(terminal)
+    //                 .engineType(engineType)
+    //                 .build();
+    //         return engineRepository.save(newEngine);
+    //     });
+    // }
 
     // public List<String> getDistinctCategories() {
     //     return engineRepository.findDistinctCategories();
