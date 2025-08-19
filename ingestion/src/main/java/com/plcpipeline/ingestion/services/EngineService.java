@@ -85,25 +85,18 @@ public class EngineService {
                 });
     }
 
-    // Retrieves an engine by its code, or creates a new one if it doesn't exist
-    // public Engine getOrCreateByCode(String code, String name, Long portId, Long terminalId, Long engineTypeId) {
-    //     return engineRepository.findByCode(code).orElseGet(() -> {
-    //         Port port = (portId != null) ? portRepository.findById(portId).orElseThrow(() -> new ResourceNotFoundException("Port not found with ID: " + portId)) : null;
-    //         Terminal terminal = (terminalId != null) ? terminalRepository.findById(terminalId).orElseThrow(() -> new ResourceNotFoundException("Terminal not found with ID: " + terminalId)) : null;
-    //         EngineType engineType = (engineTypeId != null) ? engineTypeRepository.findById(engineTypeId).orElseThrow(() -> new ResourceNotFoundException("EngineType not found with ID: " + engineTypeId)) : null;
-
-    //         Engine newEngine = Engine.builder()
-    //                 .code(code)
-    //                 .name(name != null ? name : "Unnamed Engine")
-    //                 .isActive(true)
-    //                 .lastSeen(Instant.now().toString())
-    //                 .port(port)
-    //                 .terminal(terminal)
-    //                 .engineType(engineType)
-    //                 .build();
-    //         return engineRepository.save(newEngine);
-    //     });
-    // }
+    public List<EngineDto> getEnginesByTerminalAndEngineType(List<Long> terminalIds, List<Long> engineTypeIds) {
+        if (terminalIds == null || terminalIds.isEmpty() || engineTypeIds == null || engineTypeIds.isEmpty()) {
+            throw new BadRequestException("Terminal IDs and Engine Type IDs must not be null or empty.");
+        }
+        List<Engine> engines = engineRepository.findByTerminalIdsAndEngineTypeIds(terminalIds, engineTypeIds);
+        if (engines.isEmpty()) {
+            throw new ResourceNotFoundException("No engines found for the provided terminal and engine type IDs.");
+        }
+        return engines.stream()
+                .map(Mapper::toEngineDto)
+                .collect(Collectors.toList());
+    }
 
     // public List<String> getDistinctCategories() {
     //     return engineRepository.findDistinctCategories();

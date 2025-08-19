@@ -35,6 +35,12 @@ public class EngineController {
         return ResponseEntity.ok(engineService.getEngineById(id));
     }
 
+    //getEnginesByTerminalAndEngineType
+    @GetMapping("/terminal-engine-type")
+    public ResponseEntity<List<EngineDto>> getEnginesByTerminalAndEngineType(@RequestParam List<Long> terminalIds, @RequestParam List<Long> engineTypeIds) {
+        return ResponseEntity.ok(engineService.getEnginesByTerminalAndEngineType(terminalIds, engineTypeIds));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<EngineDto> update(@PathVariable Long id, @RequestBody EngineDto dto) {
         return ResponseEntity.ok(engineService.updateEngine(id, dto));
