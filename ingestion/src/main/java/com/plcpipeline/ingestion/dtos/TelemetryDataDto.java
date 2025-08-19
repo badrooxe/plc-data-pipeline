@@ -63,6 +63,9 @@ public class TelemetryDataDto {
 // {
 //   "terminalId": 1,
 //   "engineId": "bed78dc",
+//   "engineTypeId": 2,
+//   "engineName": "terex",
+//   "ipAddress": "192.168.1.1",
 //   "portId": 1,
 //   "variables": {
 //     "rpm": 1450.5,
