@@ -9,14 +9,28 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
     private final String apiKeyHeaderName;
     private final String validApiKey;
+    // private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    // private static final List<String> PUBLIC_PATHS = Arrays.asList(
+    //     "/v1/api-docs/**",
+    //     "/v3/api-docs/**",
+    //     "/swagger-ui.html",
+    //     "/swagger-ui/**",
+    //     "/actuator/health",
+    //     "/actuator/info"
+    // );
+    
 
     public ApiKeyAuthFilter(String validApiKey, String apiKeyHeaderName) {
         this.validApiKey = validApiKey;
@@ -29,15 +43,28 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        String apiKeyHeader = request.getHeader(apiKeyHeaderName);
+        // boolean isPublicPath = PUBLIC_PATHS.stream()
+        //         .anyMatch(path -> pathMatcher.match(path, request.getRequestURI()));
 
-        if (validApiKey.equals(apiKeyHeader)) {
-            Authentication authentication = new ApiKeyAuthenticationToken(apiKeyHeader);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Unauthorized: Missing or invalid API key");
-            return;
+        // if (isPublicPath) {
+        //     filterChain.doFilter(request, response);
+        //     return;
+        // }
+        
+        // String apiKeyHeader = request.getHeader(apiKeyHeaderName);
+
+        // Only enforce API key if the request is mapped to a protected endpoint
+        if (request.getRequestURI().startsWith("/api/")) {
+            String apiKeyHeader = request.getHeader(apiKeyHeaderName);
+
+            if (validApiKey.equals(apiKeyHeader)) {
+                Authentication authentication = new ApiKeyAuthenticationToken(apiKeyHeader);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Unauthorized: Missing or invalid API key");
+                return;
+            }
         }
 
         filterChain.doFilter(request, response);

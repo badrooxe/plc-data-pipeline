@@ -2,13 +2,16 @@ package com.plcpipeline.ingestion.controllers;
 
 import com.plcpipeline.ingestion.dtos.TerminalDto;
 import com.plcpipeline.ingestion.services.TerminalService;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
-
+ 
 
 @RestController
 @RequestMapping("/api/v1/terminals")
@@ -19,6 +22,7 @@ public class TerminalController {
         this.terminalService = terminalService;
     }
 
+    //@Tag(name = "getAllTerminals", description = "Get all terminals")
     @GetMapping
     public ResponseEntity<List<TerminalDto>> getAllTerminals() {
         return ResponseEntity.ok(terminalService.getAllTerminals());

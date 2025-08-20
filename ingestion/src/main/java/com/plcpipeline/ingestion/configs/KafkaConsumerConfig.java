@@ -15,15 +15,15 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import java.util.HashMap;
 import java.util.Map;
 
-@EnableKafka
-@Configuration
+//@EnableKafka
+//@Configuration
 public class KafkaConsumerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
-    @Bean
+    //@Bean
     public ConsumerFactory<String, TelemetryDataDto> telemetryConsumerFactory() {
         
         Map<String, Object> props = new HashMap<>();
@@ -40,7 +40,7 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
-    @Bean
+    //@Bean
     public ConcurrentKafkaListenerContainerFactory<String, TelemetryDataDto> telemetryKafkaListenerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, TelemetryDataDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();

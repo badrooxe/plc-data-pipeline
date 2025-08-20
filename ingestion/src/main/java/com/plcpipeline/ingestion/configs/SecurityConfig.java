@@ -39,9 +39,27 @@ public class SecurityConfig {
             )
             .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
+                // --- Swagger + OpenAPI ---
+                .requestMatchers(
+                    //"/v1/api-docs/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**"
+                ).permitAll()
+
+                // --- Spring Boot Actuator ---
+                .requestMatchers(
+                    "/actuator/health",
+                    "/actuator/info"
+                ).permitAll()
+                
+                // --- Protect actual business APIs ---
                 .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()
+                
+                // --- Deny anything else ---
+                .anyRequest().denyAll()
             );
+
 
         return http.build();
     }
@@ -55,7 +73,7 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
