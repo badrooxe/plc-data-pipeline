@@ -6,6 +6,7 @@
 // import org.springframework.transaction.annotation.Transactional;
 
 // import com.plcpipeline.ingestion.dtos.TelemetryDataDto;
+// import com.plcpipeline.ingestion.entities.Engine;
 
 // @Service
 // public class TelemetryConsumerService {
@@ -13,9 +14,12 @@
     
 
 //     private final EngineService engineService;
+//     private final EngineSseService engineSseService;
+    
 
-//     public TelemetryConsumerService(EngineService engineService) {
+//     public TelemetryConsumerService(EngineService engineService, EngineSseService engineSseService) {
 //         this.engineService = engineService;
+//         this.engineSseService = engineSseService;
 //     }
 
 //     @KafkaListener(
@@ -33,32 +37,16 @@
 //         System.out.println("Received telemetry data: " + telemetryData);
 
 //         try{
-//             engineService.findOrCreateEngineFromTelemetry(telemetryData);
+//             // Step 1: Update PostgreSQL
+//             Engine engine = engineService.findAndUpdateEngineFromTelemetry(telemetryData);
+
+//             // Step 2: Write to InfluxDB + push SSE
+//             engineSseService.writeToInfluxAndSendUpdate(engine, telemetryData);
+
 //             System.out.println("Engine processed successfully.");
 //         } catch (Exception e) {
 //             System.out.println("Error processing telemetry data '{}': {}" + telemetryData.getEngineCode() + e.getMessage());
 //         }
 
-
-//         //Get or create engine
-//         // Engine engine = engineRepository.findByCode(telemetryData.getEngineCode())
-//         //         .orElseGet(() -> {
-//         //             // Create minimal Engine (you can enhance with more data if available)
-//         //             Engine newEngine = Engine.builder()
-//         //                     .code(telemetryData.getEngineCode())
-//         //                     .name(telemetryData.getEngineName())
-//         //                     .ipAddress(telemetryData.getIpAddress())
-//         //                     .port(telemetryData.getPortId() != null ? telemetryData.getPortId() : null)
-//         //                     .terminal(telemetryData.getTerminalId() != null ? telemetryData.getTerminalId() : null)
-//         //                     .engineType(telemetryData.getEngineTypeId() != null ? telemetryData.getEngineTypeId() : null)
-//         //                     .lastSeen(telemetryData.getTimestamp() != null ? telemetryData.getTimestamp() : Instant.now().toString())
-//         //                     .isActive(true)
-//         //                     .build();
-//         //             return engineRepository.save(newEngine);
-//         //         });
-//         // System.out.println("Engine found or created: " + engine);
-
-//         //Save telemetry record
-//         //telemetryService.saveTelemetry(engine, telemetryData);
 //     }
 // }

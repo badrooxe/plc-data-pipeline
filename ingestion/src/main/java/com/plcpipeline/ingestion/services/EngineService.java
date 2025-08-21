@@ -22,6 +22,7 @@ import com.plcpipeline.ingestion.exceptions.ResourceNotFoundException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,31 +59,80 @@ public class EngineService {
     }
 
     //This is the primary method for the Kafka ingestion pipeline.
+    // @Transactional
+    // public Engine findOrCreateEngineFromTelemetry(TelemetryDataDto telemetryData) {
+    //     return engineRepository.findByCode(telemetryData.getEngineCode())
+    //             .orElseGet(() -> {
+
+    //                 if (telemetryData.getPortId() == null || telemetryData.getTerminalId() == null || telemetryData.getEngineTypeId() == null) {
+    //                     throw new BadRequestException("Cannot create new engine from telemetry. Message for code '" 
+    //                     + telemetryData.getEngineCode() + "' is missing required portId, terminalId, or engineTypeId.");
+    //                 }
+
+    //                 Port port = portRepository.findById(telemetryData.getPortId()).orElseThrow(() -> new ResourceNotFoundException("Port not found with ID: " + telemetryData.getPortId()));
+    //                 Terminal terminal = terminalRepository.findById(telemetryData.getTerminalId()).orElseThrow(() -> new ResourceNotFoundException("Terminal not found with ID: " + telemetryData.getTerminalId()));
+    //                 EngineType engineType = engineTypeRepository.findById(telemetryData.getEngineTypeId()).orElseThrow(() -> new ResourceNotFoundException("EngineType not found with ID: " + telemetryData.getEngineTypeId()));
+
+    //                 Engine newEngine = Engine.builder()
+    //                         .code(telemetryData.getEngineCode())
+    //                         .name(telemetryData.getEngineName())
+    //                         .isActive(true)
+    //                         .lastSeen(Instant.now().toString())
+    //                         .port(port)
+    //                         .terminal(terminal)
+    //                         .engineType(engineType)
+    //                         .build();
+    //                 return engineRepository.save(newEngine);
+    //             });
+    // }
+
     @Transactional
-    public Engine findOrCreateEngineFromTelemetry(TelemetryDataDto telemetryData) {
-        return engineRepository.findByCode(telemetryData.getEngineCode())
-                .orElseGet(() -> {
+    public Engine findAndUpdateEngineFromTelemetry(TelemetryDataDto telemetryData) {
+        // Find the engine by its unique code, if it does not exist create it.
+        Engine engine = engineRepository.findByCode(telemetryData.getEngineCode())
+            .orElseGet(() -> {
+                if (telemetryData.getPortId() == null || telemetryData.getTerminalId() == null || telemetryData.getEngineTypeId() == null) {
+                    throw new BadRequestException("Cannot create new engine from telemetry. Message for code '" 
+                    + telemetryData.getEngineCode() + "' is missing required portId, terminalId, or engineTypeId.");
+                }
 
-                    if (telemetryData.getPortId() == null || telemetryData.getTerminalId() == null || telemetryData.getEngineTypeId() == null) {
-                        throw new BadRequestException("Cannot create new engine from telemetry. Message for code '" 
-                        + telemetryData.getEngineCode() + "' is missing required portId, terminalId, or engineTypeId.");
-                    }
+                Port port = portRepository.findById(telemetryData.getPortId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Port not found with ID: " + telemetryData.getPortId()));
+                Terminal terminal = terminalRepository.findById(telemetryData.getTerminalId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Terminal not found with ID: " + telemetryData.getTerminalId()));
+                EngineType engineType = engineTypeRepository.findById(telemetryData.getEngineTypeId())
+                        .orElseThrow(() -> new ResourceNotFoundException("EngineType not found with ID: " + telemetryData.getEngineTypeId()));
 
-                    Port port = portRepository.findById(telemetryData.getPortId()).orElseThrow(() -> new ResourceNotFoundException("Port not found with ID: " + telemetryData.getPortId()));
-                    Terminal terminal = terminalRepository.findById(telemetryData.getTerminalId()).orElseThrow(() -> new ResourceNotFoundException("Terminal not found with ID: " + telemetryData.getTerminalId()));
-                    EngineType engineType = engineTypeRepository.findById(telemetryData.getEngineTypeId()).orElseThrow(() -> new ResourceNotFoundException("EngineType not found with ID: " + telemetryData.getEngineTypeId()));
+                //Engine newEngine = Engine.builder()
+                return Engine.builder()
+                        .code(telemetryData.getEngineCode())
+                        .name(telemetryData.getEngineName())
+                        .isActive(true)
+                        .lastSeen(Instant.now().toString())
+                        .port(port)
+                        .terminal(terminal)
+                        .engineType(engineType)
+                        .build();
+                //return engineRepository.save(newEngine);
+            });
 
-                    Engine newEngine = Engine.builder()
-                            .code(telemetryData.getEngineCode())
-                            .name(telemetryData.getEngineName())
-                            .isActive(true)
-                            .lastSeen(Instant.now().toString())
-                            .port(port)
-                            .terminal(terminal)
-                            .engineType(engineType)
-                            .build();
-                    return engineRepository.save(newEngine);
-                });
+        // This is where we update the stateful fields in PostgreSQL.(runs for both new and existing engines)
+        engine.setLastSeen(telemetryData.getTimestamp() != null ? telemetryData.getTimestamp() : Instant.now().toString());
+
+        Map<String, Object> variables = telemetryData.getVariables();
+        if (variables != null) {
+            if (variables.containsKey("isActive")) {
+                engine.setActive((Boolean) variables.get("isActive"));
+            }
+            if (variables.containsKey("hours")) {
+                engine.setHours(((Number) variables.get("hours")).doubleValue());
+            }
+            if (variables.containsKey("notificationCount")) {
+                engine.setNotificationCount(((Number) variables.get("notificationCount")).intValue());
+            }
+        }
+
+        return engineRepository.save(engine);
     }
 
     public List<EngineDto> getEnginesByTerminalAndEngineType(List<Long> terminalIds, List<Long> engineTypeIds) {

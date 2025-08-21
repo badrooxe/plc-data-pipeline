@@ -26,6 +26,9 @@ public class Engine {
     private String lastSeen; // ISO-8601 string
     //private String model; //to remiove later
     private String manufacturer;
+    // private Double temperature;
+    private Double hours;
+    private Integer notificationCount;
 
     @ManyToOne
     @JoinColumn(name = "engine_type_id", nullable = false)
