@@ -45,7 +45,8 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
-                    "/test-influx"
+                    "/test-influx",
+                    "/engines-sse"
                 ).permitAll()
 
                 // --- Spring Boot Actuator ---

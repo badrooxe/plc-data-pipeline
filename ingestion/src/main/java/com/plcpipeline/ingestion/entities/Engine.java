@@ -25,9 +25,9 @@ public class Engine {
     private boolean isActive;
     private String lastSeen; // ISO-8601 string
     //private String model; //to remiove later
-    private String manufacturer;
+    //private String manufacturer;
     // private Double temperature;
-    private Double hours;
+    private Long hours;
     private Integer notificationCount;
 
     @ManyToOne

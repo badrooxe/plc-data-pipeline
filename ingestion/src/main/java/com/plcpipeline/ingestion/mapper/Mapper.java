@@ -56,7 +56,7 @@ public class Mapper {
                 .isActive(engine.isActive())
                 .lastSeen(engine.getLastSeen())
                 //.model(engine.getModel())
-                .manufacturer(engine.getManufacturer())
+                //.manufacturer(engine.getManufacturer())
                 .hours(engine.getHours())
                 .notificationCount(engine.getNotificationCount())
                 .portId(engine.getPort() != null ? engine.getPort().getPortId() : null)
@@ -77,7 +77,7 @@ public class Mapper {
                 .isActive(dto.isActive())
                 .lastSeen(dto.getLastSeen())
                 //.model(dto.getModel())
-                .manufacturer(dto.getManufacturer())
+                //.manufacturer(dto.getManufacturer())
                 // this mapper is still fine for api, as it doesn't handle the variables field
                 // .hours(dto.getHours())
                 // .notificationCount(dto.getNotificationCount())

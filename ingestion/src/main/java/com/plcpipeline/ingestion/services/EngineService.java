@@ -118,6 +118,8 @@ public class EngineService {
 
         // This is where we update the stateful fields in PostgreSQL.(runs for both new and existing engines)
         engine.setLastSeen(telemetryData.getTimestamp() != null ? telemetryData.getTimestamp() : Instant.now().toString());
+        engine.setName(telemetryData.getEngineName());
+        engine.setIpAddress(telemetryData.getIpAddress());
 
         Map<String, Object> variables = telemetryData.getVariables();
         if (variables != null) {
@@ -125,7 +127,7 @@ public class EngineService {
                 engine.setActive((Boolean) variables.get("isActive"));
             }
             if (variables.containsKey("hours")) {
-                engine.setHours(((Number) variables.get("hours")).doubleValue());
+                engine.setHours(((Number) variables.get("hours")).longValue());
             }
             if (variables.containsKey("notificationCount")) {
                 engine.setNotificationCount(((Number) variables.get("notificationCount")).intValue());
@@ -171,7 +173,7 @@ public class EngineService {
         existing.setActive(dto.isActive());
         existing.setLastSeen(dto.getLastSeen());
         //existing.setModel(dto.getModel());
-        existing.setManufacturer(dto.getManufacturer());
+       // existing.setManufacturer(dto.getManufacturer());
         return Mapper.toEngineDto(engineRepository.save(existing));
     }
 

@@ -31,7 +31,7 @@ public class TelemetryConsumerService {
     @Transactional
     public void consume(TelemetryDataDto telemetryData) {
         if (telemetryData == null || telemetryData.getEngineCode() == null) {
-            System.out.println("Received a null or invalid telemetry message. Discarding.");
+            //System.out.println("Received a null or invalid telemetry message. Discarding.");
             return;
         }
         System.out.println("Received telemetry data: " + telemetryData);

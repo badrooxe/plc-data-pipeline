@@ -34,8 +34,8 @@ public class EngineDto {
     private boolean isActive;
     private String lastSeen; // ISO-8601 string
     //private String model;
-    private String manufacturer;
-    private Double hours;
+    //private String manufacturer;
+    private Long hours;
     private Integer notificationCount;
 
     @NotNull(message = "portId is required.")
