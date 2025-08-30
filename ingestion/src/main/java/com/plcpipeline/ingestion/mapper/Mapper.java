@@ -135,14 +135,36 @@ public class Mapper {
                 .build();
     }
 
-    public static EngineType toEngineTypeEntity(EngineTypeDto dto) {
+    public static EngineType toEngineTypeEntity(EngineTypeDto dto, Category category) {
         return EngineType.builder()
                 .engineTypeId(dto.getEngineTypeId())
                 .name(dto.getName())
                 .family(dto.getFamily())
                 .model(dto.getModel())
                 .icon(dto.getIcon())
-                .category(dto.getCategoryId() != null ? Category.builder().categoryId(dto.getCategoryId()).build() : null)
+                .category(category)
+                .build();
+    }
+
+    // ====== Notification ======
+    public static NotificationDto toNotificationDto(Notification notification) {
+        return NotificationDto.builder()
+                .id(notification.getNotificationId())
+                .severity(notification.getSeverity())
+                .message(notification.getMessage())
+                .timestamp(notification.getTimestamp())
+                .triggerValue(notification.getTriggerValue())
+                .engineId(notification.getEngine() != null ? notification.getEngine().getEngineId() : null)
+                .build();
+    }
+    public static Notification toNotificationEntity(NotificationDto dto, Engine engine) {
+        return Notification.builder()
+                .notificationId(dto.getId())
+                .severity(dto.getSeverity())
+                .message(dto.getMessage())
+                .timestamp(dto.getTimestamp())
+                .triggerValue(dto.getTriggerValue())
+                .engine(engine)
                 .build();
     }
 }

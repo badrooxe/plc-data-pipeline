@@ -49,6 +49,7 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, TelemetryDataDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(telemetryConsumerFactory());
+        //factory.setConcurrency(4);
         return factory;
     }
 }

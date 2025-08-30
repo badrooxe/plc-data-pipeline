@@ -41,7 +41,7 @@ public class EngineTypeService {
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found with id " + dto.getCategoryId()));
 
-        EngineType engineType = Mapper.toEngineTypeEntity(dto);
+        EngineType engineType = Mapper.toEngineTypeEntity(dto, category);
         engineType.setCategory(category);
 
         engineType = engineTypeRepository.save(engineType);
