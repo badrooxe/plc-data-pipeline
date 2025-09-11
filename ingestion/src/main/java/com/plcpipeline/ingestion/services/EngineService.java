@@ -21,6 +21,7 @@ import com.plcpipeline.ingestion.exceptions.ResourceConflictException;
 import com.plcpipeline.ingestion.exceptions.ResourceNotFoundException;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -121,7 +122,7 @@ public class EngineService {
         engine.setName(telemetryData.getEngineName());
         engine.setIpAddress(telemetryData.getIpAddress());
 
-        Map<String, Object> variables = telemetryData.getVariables();
+        Map<String, Object> variables = telemetryData.getValue();
         if (variables != null) {
             if (variables.containsKey("isActive")) {
                 engine.setActive((Boolean) variables.get("isActive"));
@@ -154,12 +155,28 @@ public class EngineService {
     //     return engineRepository.findDistinctCategories();
     // }
 
+
+
     public List<EngineDto> getAllEngines() {
         return engineRepository.findAll().stream().map(Mapper::toEngineDto).collect(Collectors.toList());
     }
 
     public EngineDto getEngineById(Long id) {
-        return engineRepository.findById(id).map(Mapper::toEngineDto).orElse(null);
+        return engineRepository.findById(id).map(Mapper::toEngineDto).orElseThrow(() -> new ResourceNotFoundException("Engine not found with ID: " + id));
+    }
+
+    public EngineDto getEngineByCode(String code) {
+        return engineRepository.findByCode(code).map(Mapper::toEngineDto).orElseThrow(() -> new ResourceNotFoundException("Engine not found with code: " + code));
+    }
+
+    public List<String> getEngineCameraIds(EngineDto engine){
+        List<String> cameraIdsStr = engine.getCameraIds();
+        if (cameraIdsStr == null) return List.of();
+        return cameraIdsStr.stream()
+                .filter(id -> id != null && !id.trim().isEmpty())
+                .map(String::trim)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     public EngineDto updateEngine(Long id, EngineDto dto) {

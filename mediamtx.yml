@@ -1,0 +1,45 @@
+logLevel: debug
+logDestinations: [stdout]
+
+api: yes
+apiAddress: :9997
+
+rtsp: yes
+rtspAddress: :8554
+
+rtmp: yes
+rtmpAddress: :1936
+
+hls: yes
+hlsAddress: :8898
+
+webrtc: no
+  # No TURN configured (intranet/internal clients)
+
+# pathDefaults:
+#   source: publisher
+#   sourceOnDemand: no
+#   sourceOnDemandStartTimeout: 10s
+#   sourceOnDemandCloseAfter: 60s
+
+authMethod: internal
+authInternalUsers: 
+  # This user is for your backend API. It requires a username and password.
+  - user: mtxadmin
+    pass: mtxpass
+    permissions:
+      - action: api
+
+  # This rule allows anyone (e.g., your browser player) to read and publish streams
+  # without needing credentials. This is common for internal-only systems.
+  - user: any
+    pass:
+    ips: ['0.0.0.0/0']
+    permissions:
+      - action: publish
+      - action: read
+
+paths:
+  all_others:
+
+

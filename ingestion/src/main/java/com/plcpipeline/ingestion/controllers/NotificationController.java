@@ -36,7 +36,7 @@ public class NotificationController {
     }
 
     @GetMapping("/timeRange")
-    public ResponseEntity<List<NotificationDto>> getNotificationsByTimeRange(@RequestParam Instant startTime, @RequestParam Instant endTime) {
+    public ResponseEntity<List<NotificationDto>> getNotificationsByTimeRange(@RequestParam Long startTime, @RequestParam Long endTime) {
         List<NotificationDto> notifications = notificationService.getNotificationsByTimeRange(startTime, endTime);
         return ResponseEntity.ok(notifications);
     }

@@ -11,5 +11,55 @@ services:
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
 
+  mediamtx:
+    image: bluenviron/mediamtx:latest-ffmpeg
+    container_name: mediamtx-rtsp
+    restart: unless-stopped
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml:ro
+    ports:
+      - "8554:8554"            # RTSP (optional externally)
+      - "1936:1936"            # RTMP (optional)
+      - "8898:8898"            # HTTP (reader UI, HLS)
+      # bind control API to localhost only for security
+      - "127.0.0.1:9997:9997"
+    #command: ["/mediamtx", "/mediamtx.yml"]
+    environment:
+      - MTX_LOG_LEVEL=info
+
+  influxdb:
+    image: influxdb:3-core # Use the official InfluxDB 3 image
+    container_name: influxdb3
+    ports:
+      - "8181:8181" # Expose the InfluxDB API port to your host machine
+    command:
+      - influxdb3
+      - serve
+      - --node-id=node0
+      - --object-store=file
+      - --data-dir=/var/lib/influxdb3/data
+      - --plugin-dir=/var/lib/influxdb3/plugins
+    volumes:
+      - type: bind
+        source: ~/.influxdb3/core/data
+        target: /var/lib/influxdb3/data
+      - type: bind
+        source: ~/.influxdb3/core/plugins
+        target: /var/lib/influxdb3/plugins
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana-oss
+    ports:
+      - "3000:3000" # Expose Grafana UI on port 3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin # Change in production
+
 volumes:
   timescaledb_data:
+  # mediamtx_data:
+  influxdb_data:
+  grafana_data:

@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.influxdb.v3.client.InfluxDBClient;
 import com.influxdb.v3.client.Point;
 import com.plcpipeline.ingestion.dtos.EngineDto;
@@ -41,7 +42,7 @@ public class EngineSseService {
 
     // batch buffer
     private final List<Point> buffer = Collections.synchronizedList(new ArrayList<>());
-    private final int BATCH_SIZE = 100;
+    private final int BATCH_SIZE = 500; // adjust as needed
     private final long FLUSH_INTERVAL_MS = 60000; // flush every 60s if not full
 
     // In-memory latest state map (engineCode → EngineDto)
@@ -79,6 +80,7 @@ public class EngineSseService {
     public void writeToInfluxAndSendUpdate(Engine engine, TelemetryDataDto telemetry) {
         // Step 1: Write the time-series data to InfluxDB
         writeTelemetryPoint(engine, telemetry);
+        writeAllTelemetryPoint(engine, telemetry);
 
         // Step 2: Convert the updated Engine entity to a DTO for the SSE payload
         //EngineDto updatedEngineDto = Mapper.toEngineDto(engine);
@@ -92,9 +94,9 @@ public class EngineSseService {
         updatedEngine.setPortId(telemetry.getPortId());
         updatedEngine.setTerminalId(telemetry.getTerminalId());
         updatedEngine.setEngineTypeId(telemetry.getEngineTypeId());
-        updatedEngine.setActive((Boolean) telemetry.getVariables().get("isActive"));
-        updatedEngine.setHours(((Number) telemetry.getVariables().get("hours")).longValue());
-        updatedEngine.setNotificationCount(((Number) telemetry.getVariables().get("notificationCount")).intValue());
+        updatedEngine.setActive((Boolean) telemetry.getValue().get("État d'alimentation de l'entraînement du moteur d'orientation (1 = On)"));
+        updatedEngine.setHours(((Number) telemetry.getValue().get("Compteur d'heures de service total de la grue")).longValue());
+        //updatedEngine.setNotificationCount(((Number) telemetry.getValue().get("notificationCount")).intValue());
 
         latestStateMap.put(telemetry.getEngineCode(), updatedEngine);
 
@@ -105,13 +107,11 @@ public class EngineSseService {
 
     private void writeTelemetryPoint(Engine engine, TelemetryDataDto telemetry) {
         // Implement the logic to write telemetry data to InfluxDB
-        Map<String, Object> variables = telemetry.getVariables();
+        Map<String, Object> variables = telemetry.getValue();
         if (variables == null || variables.isEmpty()) {
             //System.out.println("No variables found in telemetry data. Skipping InfluxDB write.");
             return;
         }
-
-        
 
         try {
             // Full history measurement
@@ -124,10 +124,10 @@ public class EngineSseService {
                 .setField("portId", telemetry.getPortId())
                 .setField("terminalId", telemetry.getTerminalId())
                 .setField("engineTypeId", telemetry.getEngineTypeId())
-                .setField("isActive", telemetry.getVariables().get("isActive"))
-                .setField("hours", telemetry.getVariables().get("hours"))
-                .setField("notificationCount", telemetry.getVariables().get("notificationCount"))
-                .setTimestamp(Instant.parse(telemetry.getTimestamp()));
+                .setField("isActive", telemetry.getValue().get("État d'alimentation de l'entraînement du moteur d'orientation (1 = On)"))
+                .setField("hours", telemetry.getValue().get("Compteur d'heures de service total de la grue"));
+                //.setField("notificationCount", telemetry.getValue().get("notificationCount"))
+                //.setTimestamp(Instant.parse(telemetry.getTimestamp()));
 
             buffer.add(point);
             //buffer.add(latestPoint);
@@ -135,13 +135,68 @@ public class EngineSseService {
                 flush();
             }
 
-            
+        } catch (Exception e) {
+            System.out.println("Failed to write telemetry data to InfluxDB: " + e.getMessage());
+        }   
+    }
+
+    private void writeAllTelemetryPoint(Engine engine, TelemetryDataDto telemetry) {
+        Map<String, Object> variables = telemetry.getValue();
+        if (variables == null || variables.isEmpty()) {
+            //System.out.println("No variables found in telemetry data. Skipping InfluxDB write.");
+            return;
+        }
+
+        try {
+            // Full history measurement
+            Point point = Point.measurement("engine_all_telemetry")
+                .setField("engineId", engine.getEngineId())
+                .setField("engineCode", telemetry.getEngineCode())
+                .setField("engineName", telemetry.getEngineName())
+                .setField("ipAddress", telemetry.getIpAddress())
+                .setField("lastSeen", telemetry.getTimestamp() != null ? telemetry.getTimestamp() : Instant.now().toString())
+                .setField("portId", telemetry.getPortId())
+                .setField("terminalId", telemetry.getTerminalId())
+                .setField("engineTypeId", telemetry.getEngineTypeId());
+                //.setTimestamp(Instant.parse(telemetry.getTimestamp()));
+                // .setField("isActive", telemetry.getValue().get("État d'alimentation de l'entraînement du moteur d'orientation (1 = On)"))
+                // .setField("hours", telemetry.getValue().get("Compteur d'heures de service total de la grue"))
+                // .setField("notificationCount", telemetry.getValue().get("notificationCount"))
+                for (Map.Entry<String, Object> entry : variables.entrySet()) {
+                    String varName = entry.getKey();
+                    Object varValue = entry.getValue();
+                    if (varValue == null) continue;
+                    else if (varValue instanceof Number) {
+                        point.setField(varName, ((Number) varValue).doubleValue());
+                    } else if (varValue instanceof Boolean) {
+                        point.setField(varName, (Boolean) varValue);
+                    } else if (varValue instanceof String) {
+                        point.setField(varName, (String) varValue);
+                    }
+                }
+
+            Point point2 = Point.measurement("engine_all_telemetry_json")
+                .setField("engineId", engine.getEngineId())
+                .setField("engineCode", telemetry.getEngineCode())
+                .setField("engineName", telemetry.getEngineName())
+                .setField("ipAddress", telemetry.getIpAddress())
+                .setField("lastSeen", telemetry.getTimestamp() != null ? telemetry.getTimestamp() : Instant.now().toString())
+                .setField("portId", telemetry.getPortId())
+                .setField("terminalId", telemetry.getTerminalId())
+                .setField("engineTypeId", telemetry.getEngineTypeId())
+                //.setTimestamp(Instant.parse(telemetry.getTimestamp()))
+                // set the full value object as a JSON string field
+                .setField("values", new ObjectMapper().writeValueAsString(variables));
+
+            buffer.add(point);
+            buffer.add(point2);
+            if (buffer.size() >= BATCH_SIZE) {
+                flush();
+            }
 
         } catch (Exception e) {
             System.out.println("Failed to write telemetry data to InfluxDB: " + e.getMessage());
         }
-
-        
     }
 
     public List<EngineDto> getLatestStateForAllEngines() {

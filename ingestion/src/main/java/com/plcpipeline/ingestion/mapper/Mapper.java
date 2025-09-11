@@ -59,6 +59,7 @@ public class Mapper {
                 //.manufacturer(engine.getManufacturer())
                 .hours(engine.getHours())
                 .notificationCount(engine.getNotificationCount())
+                .cameraIds(engine.getCameraIds())
                 .portId(engine.getPort() != null ? engine.getPort().getPortId() : null)
                 .terminalId(engine.getTerminal() != null ? engine.getTerminal().getTerminalId() : null)
                 .engineTypeId(engine.getEngineType() != null ? engine.getEngineType().getEngineTypeId() : null)
@@ -81,6 +82,7 @@ public class Mapper {
                 // this mapper is still fine for api, as it doesn't handle the variables field
                 // .hours(dto.getHours())
                 // .notificationCount(dto.getNotificationCount())
+                .cameraIds(dto.getCameraIds())
                 .port(port)
                 .terminal(terminal)
                 .engineType(engineType)

@@ -1,5 +1,7 @@
 package com.plcpipeline.ingestion.dtos;
 
+import java.util.List;
+
 //import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotBlank;
@@ -37,6 +39,7 @@ public class EngineDto {
     //private String manufacturer;
     private Long hours;
     private Integer notificationCount;
+    private List<String> cameraIds;
 
     @NotNull(message = "portId is required.")
     private Long portId;

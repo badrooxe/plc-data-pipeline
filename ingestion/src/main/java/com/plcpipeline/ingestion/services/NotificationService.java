@@ -34,11 +34,11 @@ public class NotificationService {
             .toList();
     }
 
-    public List<NotificationDto> getNotificationsByTimeRange(Instant startTime, Instant endTime) {
-        if (startTime.isAfter(endTime)) {
-        throw new IllegalArgumentException("Start time must be before end time");
+    public List<NotificationDto> getNotificationsByTimeRange(Long startTime, Long endTime) {
+        if (startTime > endTime) {
+            throw new IllegalArgumentException("Start time must be before end time");
         }
-        return notificationRepository.getNotificationsByTimeRange(startTime, endTime)
+        return notificationRepository.findByTimestampBetween(startTime, endTime)
                 .stream()
                 .map(Mapper::toNotificationDto)
                 .collect(Collectors.toList());
@@ -53,14 +53,16 @@ public class NotificationService {
     public List<NotificationDto> getNotificationsByEngineId(Long engineId) {
         Engine engine = engineRepository.findById(engineId)
                 .orElseThrow(() -> new ResourceNotFoundException("Engine not found with id " + engineId));
-        return notificationRepository.findByEngineEngineId(engineId)
+        return notificationRepository.findByEngine_EngineId(engine.getEngineId())
                 .stream()
                 .map(Mapper::toNotificationDto)
                 .collect(Collectors.toList());
     }
 
     public List<NotificationDto> getNotificationsByEngineCode(String engineCode) {
-        return notificationRepository.findByEngineEngineCode(engineCode)
+        Engine engine = engineRepository.findByCode(engineCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Engine not found with code " + engineCode));
+        return notificationRepository.findByEngine_Code(engine.getCode())
                 .stream()
                 .map(Mapper::toNotificationDto)
                 .collect(Collectors.toList());

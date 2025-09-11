@@ -12,6 +12,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 
 @Configuration
@@ -37,6 +39,12 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("Unauthorized: " + authException.getMessage());
+                })
+            )
             .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 // --- Swagger + OpenAPI ---
@@ -56,10 +64,10 @@ public class SecurityConfig {
                 ).permitAll()
                 
                 // --- Protect actual business APIs ---
-                .requestMatchers("/api/**").authenticated()
+                //.requestMatchers("/api/**").authenticated()
                 
                 // --- Deny anything else ---
-                .anyRequest().denyAll()
+                .anyRequest().authenticated()
             );
 
 
@@ -70,7 +78,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(allowedOrigins));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

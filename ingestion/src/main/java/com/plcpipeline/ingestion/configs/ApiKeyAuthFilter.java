@@ -1,5 +1,6 @@
 package com.plcpipeline.ingestion.configs;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +36,16 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false; // allow filtering during async re-dispatch
+    }
+
+    @Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        return false; // allow filtering during error dispatch too
+    }
+
+    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
@@ -51,18 +62,24 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
         // String apiKeyHeader = request.getHeader(apiKeyHeaderName);
 
         // Only enforce API key if the request is mapped to a protected endpoint
-        if (request.getRequestURI().startsWith("/api/")) {
+        //if (request.getRequestURI().startsWith("/api/")) {
+
+        DispatcherType dispatcherType = request.getDispatcherType();
+        System.out.println("Dispatcher Type: " + dispatcherType);
+        
             String apiKeyHeader = request.getHeader(apiKeyHeaderName);
 
             if (validApiKey.equals(apiKeyHeader)) {
                 Authentication authentication = new ApiKeyAuthenticationToken(apiKeyHeader);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Unauthorized: Missing or invalid API key");
-                return;
-            }
-        }
+            } 
+            // else {
+            //     //response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            //     //response.getWriter().write("Unauthorized: Missing or invalid API key");
+            //     //return;
+            //     SecurityContextHolder.clearContext();
+            // }
+        //}
 
         filterChain.doFilter(request, response);
     }

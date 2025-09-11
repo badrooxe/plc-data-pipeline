@@ -20,7 +20,7 @@ public class TelemetryDataDto {
     private String ipAddress;
     private String timestamp;
 
-    private Map<String, Object> variables;// key = variable_name, value = value
+    private Map<String, Object> value;// key = variable_name, value = value
 
     // private String variableName;
     // private Object value;

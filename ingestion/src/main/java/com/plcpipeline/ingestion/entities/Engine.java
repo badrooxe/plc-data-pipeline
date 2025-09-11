@@ -1,5 +1,7 @@
 package com.plcpipeline.ingestion.entities;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +31,11 @@ public class Engine {
     // private Double temperature;
     private Long hours;
     private Integer notificationCount;
+    //private List<String> cameraIds;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "engine_camera_ids", joinColumns = @JoinColumn(name = "engine_id"))
+    @Column(name = "camera_id")
+    private List<String> cameraIds;
 
     @ManyToOne
     @JoinColumn(name = "engine_type_id", nullable = false)
